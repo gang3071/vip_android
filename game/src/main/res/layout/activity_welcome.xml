@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/big_bg"
+    android:keepScreenOn="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/show_top_ly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@mipmap/big_bg"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/show_top_v"
+                android:layout_width="606dp"
+                android:layout_height="401dp"
+                android:src="@mipmap/logo_yijibang"
+                android:visibility="visible"
+                app:ease_border_color="#EEEEEE"
+                app:ease_border_width="0dp"
+                app:es_shape_type="rectangle" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="6"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ProgressBar
+                android:id="@+id/progress_circular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:indeterminateDrawable="@drawable/pass_word_bg1" />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/back_iv"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/likai" />
+    <TextView
+        android:id="@+id/banbenhao_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="40dp"
+        android:textSize="26sp"
+        android:textColor="@color/white"
+        android:layout_marginTop="20dp" />
+
+
+
+    <LinearLayout
+        android:layout_width="500dp"
+        android:layout_height="300dp"
+        android:id="@+id/show_loadd"
+        android:visibility="gone"
+        android:background="@drawable/anjian_word_bg1"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:indeterminateDrawable="@drawable/pass_word_bg1" />
+        <TextView
+            android:id="@+id/loading_tvs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:textColor="#FFFFFF"
+            android:text="正在加载游戏框架0%…"
+            android:textSize="30sp" />
+    </LinearLayout>
+
+</RelativeLayout>
+
+

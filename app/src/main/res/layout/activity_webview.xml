@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:orientation="vertical">
+
+    <com.timego.calculcator.StatusLayout
+        android:id="@+id/top_vvvv1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/top_vvvv"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/top_vvvv1"
+        android:background="@color/white"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/back_iv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_action_back" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/index_log1" />
+
+
+    </RelativeLayout>
+
+
+
+    <com.tencent.smtt.sdk.WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_vvvv" />
+
+    <LinearLayout
+        android:id="@+id/show_top_ly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_vvvv"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:gravity="center">
+
+            <com.timego.calculcator.CircleImageView
+                android:id="@+id/show_top_v"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@mipmap/winway"
+                android:visibility="visible"
+                app:ease_border_color="#EEEEEE"
+                app:ease_border_width="1dp"
+                app:es_shape_type="round" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="6"
+            android:gravity="center">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminateDrawable="@drawable/pass_word_bg1"
+                android:layout_centerHorizontal="true" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/videoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:visibility="gone"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentRight="true"
+        android:indeterminateDrawable="@drawable/pass_word_bg2"
+        />
+
+</RelativeLayout>
+
+

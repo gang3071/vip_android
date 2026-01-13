@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:keepScreenOn="true"
+    android:orientation="vertical">
+
+    <com.timego.calculcator.StatusLayout
+        android:id="@+id/top_vvvv1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/top_vvvv"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/top_vvvv1"
+        android:background="@color/white"
+        android:visibility="gone">
+
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:src="@mipmap/index_log1" />
+
+
+    </RelativeLayout>
+
+
+<!--    <WebView-->
+<!--        android:id="@+id/webview"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_below="@id/top_vvvv" />-->
+<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_centerInParent="true"-->
+<!--        android:background="@mipmap/big_bg"-->
+<!--        tools:ignore="WebViewLayout">-->
+        <WebView
+            android:id="@+id/webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            tools:ignore="MissingConstraints" />
+<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+<!--    <com.github.lzyzsd.jsbridge.X5BridgeWebView-->
+<!--        android:id="@+id/webview"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_below="@id/top_vvvv"-->
+<!--        />-->
+
+    <LinearLayout
+        android:id="@+id/layoutError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progress_error"
+            style="@android:style/Widget.ProgressBar.Large"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:text="@string/agentweb_loading" />
+
+        <TextView
+            android:id="@+id/errormsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="#999999"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/show_top_ly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_vvvv"
+        android:background="@mipmap/big_bg"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:gravity="center">
+
+            <com.timego.calculcator.CircleImageView
+                android:id="@+id/show_top_v"
+                android:layout_width="606dp"
+                android:layout_height="401dp"
+                android:src="@mipmap/logo_yijibang"
+                android:visibility="visible"
+                app:ease_border_color="#EEEEEE"
+                app:ease_border_width="0dp"
+                app:es_shape_type="rectangle" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="6"
+            android:gravity="center">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:indeterminateDrawable="@drawable/pass_word_bg1" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/videoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="15dp"
+        android:indeterminateDrawable="@drawable/pass_word_bg2"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/back_iv"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/likai" />
+
+
+<!--    <ImageView-->
+<!--        android:id="@+id/bengkui_iv"-->
+<!--        android:layout_width="80dp"-->
+<!--        android:layout_height="80dp"-->
+<!--        android:layout_marginStart="40dp"-->
+<!--        android:layout_marginBottom="60dp"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:src="@mipmap/likai" />-->
+
+</RelativeLayout>
+
+

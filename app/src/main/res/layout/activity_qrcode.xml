@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/big_bg"
+    android:orientation="vertical"
+
+    tools:context=".MainActivity">
+
+    <include
+        android:id="@+id/top_v"
+        layout="@layout/layout_action_bar" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+        <androidx.cardview.widget.CardView
+            android:layout_width="600dp"
+            android:layout_height="600dp"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="@color/color_323563">
+            <ImageView
+                android:id="@+id/donghua_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:layout_margin="20dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/jisuanqi_logo" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/jiqima_tv"
+            android:layout_toRightOf="@id/back_button1"
+            android:gravity="center_vertical"
+            android:scaleType="centerInside"
+            android:layout_marginTop="40dp"
+            android:text="机器码："
+            android:textColor="@color/white"
+            android:textSize="48sp" />
+    </LinearLayout>
+
+
+
+</LinearLayout>
+

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="285dp"
+        android:layout_height="wrap_content"
+        android:minHeight="144dp"
+        android:background="@drawable/shape_dialog_bg_new"
+        android:orientation="vertical">
+
+
+
+        <TextView
+            android:layout_width="245dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:lineSpacingExtra="4dp"
+            android:gravity="center"
+            android:id="@+id/content_tv"
+            android:layout_gravity="center_horizontal"
+            android:text="1111111111"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="#D8D8D8"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="62dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/cancel_tv"
+                android:text="@string/cancel_txt"
+                android:gravity="center"
+                android:textColor="#e44f3e"
+                android:textSize="16sp"
+                />
+            <View android:layout_width="1dp"
+                android:id="@+id/line_v"
+                android:layout_height="42dp"
+                android:background="#d8d8d8"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/sumbit_tv"
+                android:text="@string/sure_txt"
+                android:gravity="center"
+                android:textColor="#6b3689"
+                android:textSize="16sp"
+                />
+        </LinearLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+</LinearLayout>
