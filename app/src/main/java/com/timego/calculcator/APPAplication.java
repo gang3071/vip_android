@@ -11,6 +11,8 @@ import com.tencent.bugly.crashreport.CrashReport;
 import com.tencent.smtt.sdk.QbSdk;
 import com.tencent.smtt.sdk.WebView;
 
+import top.maybesix.xhlibrary.serialport.SerialPortHelper;
+
 /**
  * **********************
  *
@@ -22,16 +24,20 @@ import com.tencent.smtt.sdk.WebView;
 public class APPAplication extends Application {
     public static Context AppContext;
 
+
+    public SerialPortHelper serialPort; //数钞机
+
     public static Context getAppContext() {
         return AppContext;
     }
+
     @Override
     public void onCreate() {
         // TODO Auto-generated method stub
         super.onCreate();
         //搜集本地tbs内核信息并上报服务器，服务器返回结果决定使用哪个内核。
         AppContext = getApplicationContext();
-
+        initSerialPort();
         QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
 
             @Override
@@ -47,7 +53,7 @@ public class APPAplication extends Application {
             }
         };
         //x5内核初始化接口
-        QbSdk.initX5Environment(getApplicationContext(),  cb);
+        QbSdk.initX5Environment(getApplicationContext(), cb);
 
         CrashReport.initCrashReport(getApplicationContext(), "af0e3d7852", true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -55,17 +61,29 @@ public class APPAplication extends Application {
         }
     }
 
+    public SerialPortHelper getSerialPortHelper() {
+        return serialPort;
+    }
+
+    private void initSerialPort() {
+        serialPort = new SerialPortHelper("/dev/ttyS1", 9600);
+
+        serialPort.open();
+//        sendDataLianJie();
+//        myCountDownTimer = new MyCountDownTimer(1000 * 60 * 60 * 24 * 365, 1000 * 10);
+//        myCountDownTimer.start();
+
+    }
 
 
-
-    public static void saveString(Context context,String key, String value) {
+    public static void saveString(Context context, String key, String value) {
         SharedPreferences sp = context.getSharedPreferences("InitApp", Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(key, value);
         editor.apply();
     }
 
-    public static String getString(Context context,String key, String defValue) {
+    public static String getString(Context context, String key, String defValue) {
         if (context == null) {
             return defValue;
         }

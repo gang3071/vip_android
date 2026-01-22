@@ -35,7 +35,8 @@ public interface ApiService {
     String BASE_URL = isProduction?"https://api.1ting.cn":"https://yjb-test-api.qtalk666.top";
 
     String Site_Id = "7e3c09b8-38ed-4092-b8ec-872fdec78499";
-    String DEFAULT_WEB_URL = "http://client.senboli.com";
+    //String DEFAULT_WEB_URL = "http://client.senboli.com";
+    String DEFAULT_WEB_URL = "https://yxw.1ting.cn";
 
     String DownLoadUrl = "https://oss.letschat2023.com/version.json";
 

@@ -9,35 +9,58 @@
     android:keepScreenOn="true"
     android:orientation="vertical">
 
-    <Button
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="获取设备码"
-        android:id="@+id/shebeima_bt"/>
+        android:layout_height="300dp">
+
+        <TextView
+            android:id="@+id/txt_log"
+            android:textColor="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
 
     <Button
+        android:id="@+id/clean"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="开始收钱"
-        android:id="@+id/shouqian_bt"/>
+        android:text="清除日志" />
 
     <Button
+        android:id="@+id/shebeima_bt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="结束收钱"
-        android:id="@+id/jieshu_bt"/>
+        android:text="获取设备码" />
 
     <Button
+        android:id="@+id/connect_bt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="结束收钱确认"
-        android:id="@+id/jieshuagain_bt"/>
+        android:text="是否连接" />
 
     <Button
+        android:id="@+id/shouqian_bt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="收钱"
-        android:id="@+id/shouqians_bt"/>
+        android:text="开始收钱" />
+
+    <Button
+        android:id="@+id/jieshu_bt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="结束收钱" />
+
+    <Button
+        android:id="@+id/jieshuagain_bt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="结束收钱确认" />
+
+    <Button
+        android:id="@+id/shouqians_bt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="收钱" />
 
 </LinearLayout>
 

@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Handler handler = new Handler();
     public void displayInput(){
         activityMainBinding.inputText.setText(currentInput);
-        if(currentInput.toString().equals(MainActivity.getString(MainActivity.this,"loc_pass","51797"))){
+        if(currentInput.toString().equals(MainActivity.getString(MainActivity.this,"loc_pass","54961"))){
             toNextActivity();
         }else if(currentInput.toString().equals("888*999")){
             handler.postDelayed(() -> {
@@ -284,7 +284,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             currentInput=new StringBuilder("");
             activityMainBinding.inputText.setText("");
 //            startActivity(new Intent(MainActivity.this,MainActivity2.class));
-            startActivity(new Intent(MainActivity.this,MainActivityNew.class));
+           startActivity(new Intent(MainActivity.this,MainActivityNew.class));
+          // startActivity(new Intent(MainActivity.this,TestttysActivity.class));
             overridePendingTransition(0, 0);
 //            finish();
 //            H5WebGameActivity.startH5WebGameActivity(MainActivity.this, getString(R.string.app_name), "");

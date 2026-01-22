@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,8 +37,10 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
@@ -68,6 +71,12 @@ import com.timego.calculcator.driver.USBTransferUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+
+import ZtlApi.Gpio;
+import ZtlApi.ZtlManager;
+import top.maybesix.xhlibrary.serialport.ComPortData;
+import top.maybesix.xhlibrary.serialport.SerialPortHelper;
 
 
 public class MainActivityNew extends AppCompatActivity {
@@ -90,9 +99,136 @@ public class MainActivityNew extends AppCompatActivity {
     //    private ImageView backIv;
 //    private ProgressBar progressBar;
     ActivityMain2NewBinding activityBinding;
-    USBTransferUtil USB;
+    //USBTransferUtil USB;
+    public static SerialPortHelper serialPort; //数钞机
+
     int inputMoney = 0;
     public ArrayList<Integer> numbers = new ArrayList<>();
+
+    class GpioInfo {
+        public Gpio gpio;
+        Thread inputThread;
+
+        //        Switch sGpioValue;
+        boolean ThreadisSend = true;
+    }
+
+
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            if (msg.what == 1) {
+                try {
+                    ComPortData data = (ComPortData) msg.obj;
+                    onDataReceiver(data.getRecData());
+                } catch (Exception e) {
+
+                }
+
+                // stringBuilder.append("\n" + "收到指令" + data);   //810DFF10  1000回复的指令  8109FE10  500回复的指令    8101FF10  100回复的指令
+//                if (Integer.parseInt(data) >= 100) {
+//                    numbers.add(Integer.parseInt(data));
+//                } else if (data.equals("-7")) {
+//                    if (numbers.size() > 0) {
+//                        inputMoney += numbers.get(numbers.size() - 1);
+//                    }
+//                }
+                // stringBuilder.append("\n" + "收钱数额" + data + "\r\n" + "：总收款：" + inputMoney);
+//                activityBinding.txtLog.setText(stringBuilder.toString());
+            }
+        }
+    };
+
+    private int step = 0;
+    private int data1 = 0;
+    private int data2 = 0;
+    private long lastReceiveTime = 0; // 记录上一次收到字节的时间点
+
+
+    public void onDataReceiver(byte[] buffer) {
+        if (buffer == null) return;
+
+//        long currentTime = System.currentTimeMillis();
+//
+//        // --- 超时检测逻辑 ---
+//        // 如果距离上一个字节超过 500 毫秒，且处于中间状态，强制归零
+//        if (step != 0 && (currentTime - lastReceiveTime) > 500) {
+//            step = 0;
+//            Log.w("Serial", "指令接收超时，已自动重置状态机");
+//             stringBuilder.append("\n" + "指令接收超时，已自动重置状态机");   //810DFF10  1000回复的指令  8109FE10  500回复的指令    8101FF10  100回复的指令
+//            activityBinding.txtLog.setText(stringBuilder.toString());
+//        }
+//        lastReceiveTime = currentTime;
+
+        for (byte b : buffer) {
+            int val = b & 0xFF;
+
+            switch (step) {
+                case 0: // 等待头 81
+                    if (val == 0x81) step = 1;
+                    break;
+
+                case 1: // 记录第 2 位
+                    data1 = val;
+                    step = 2;
+                    break;
+
+                case 2: // 记录第 3 位
+                    data2 = val;
+                    step = 3;
+                    break;
+
+                case 3: // 验证结尾 10
+                    if (val == 0x10) {
+                        handleAmount(data1, data2);
+                    } else {
+                        // 如果结尾不是 10，说明数据错位，尝试看当前位是不是新指令的 81
+                        if (val == 0x81) {
+                            step = 1;
+                            continue; // 跳过最后的 step=0
+                        }
+                    }
+                    step = 0; // 处理完或出错都重置
+                    break;
+            }
+        }
+    }
+
+    private void handleAmount(int b2, int b3) {
+        final String message;
+        final int amount;
+//        stringBuilder.append("\n" + "解析金额指令开始");   //810DFF10  1000回复的指令  8109FE10  500回复的指令    8101FF10  100回复的指令
+//        activityBinding.txtLog.setText(stringBuilder.toString());
+        // 1. 先在子线程计算出金额，确定提示内容
+        if (b2 == 0x0D && b3 == 0xFF) {
+            amount = 1000;
+            message = "成功接收 1000 ";
+        } else if (b2 == 0x09 && b3 == 0xFE) {
+            amount = 500;
+            message = "成功接收 500 ";
+        } else if (b2 == 0x01 && b3 == 0xFF) {
+            amount = 100;
+            message = "成功接收 100 ";
+        } else {
+            amount = 0;
+            message = null;
+        }
+
+        // 2. 如果金额有效，切换到主线程进行 UI 提示
+        if (message != null) {
+            inputMoney = inputMoney + amount;
+            // 使用 runOnUiThread 切换线程
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//
+//                }
+//            });
+        }
+    }
+
+    //动态数组
+    List<GpioInfo> gpios = new ArrayList<>();
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -117,35 +253,47 @@ public class MainActivityNew extends AppCompatActivity {
         activityBinding = ActivityMain2NewBinding.inflate(LayoutInflater.from(this));
         setContentView(activityBinding.getRoot());
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        ZtlManager.GetInstance().setContext(this);
         hideBottomUIMenu();
         initView();
         activityBinding.backIv.setOnClickListener(view -> onBackPressed());
 
         getBaseUrls();
-
-        USB = USBTransferUtil.getInstance();
-        USB.init(this);
-        // 数据接收
-        USB.setOnUSBDateReceive(new USBTransferUtil.OnUSBDateReceive() {
+        openGPIO();
+        serialPort = ((APPAplication) getApplication()).getSerialPortHelper();
+        serialPort.setSerialPortReceivedListener(new SerialPortHelper.OnSerialPortReceivedListener() {
             @Override
-            public void onReceive(String data_str) {
-                if (Integer.parseInt(data_str) >= 100) {
-                    numbers.add(Integer.parseInt(data_str));
-                } else if (data_str.equals("-7")) {
-                    if (numbers.size() > 0) {
-                        inputMoney += numbers.get(numbers.size() - 1);
-                    }
+            public void onSerialPortDataReceived(ComPortData comPortData) {
+                try {
+                    mHandler.sendMessage(mHandler.obtainMessage(1, comPortData));
+                } catch (Exception e) {
+                    mHandler.sendMessage(mHandler.obtainMessage(1, "解析数据失败"));
                 }
-
-                LogUtils.i("receive: 收钱" + data_str + "\r\n" + "：总收款：" + inputMoney);
-            }
-
-            @Override
-            public void onNextMoney() {
 
             }
         });
+//        USB = USBTransferUtil.getInstance();
+//        USB.init(this);
+//        // 数据接收
+//        USB.setOnUSBDateReceive(new USBTransferUtil.OnUSBDateReceive() {
+//            @Override
+//            public void onReceive(String data_str) {
+//                if (Integer.parseInt(data_str) >= 100) {
+//                    numbers.add(Integer.parseInt(data_str));
+//                } else if (data_str.equals("-7")) {
+//                    if (numbers.size() > 0) {
+//                        inputMoney += numbers.get(numbers.size() - 1);
+//                    }
+//                }
+//
+//                LogUtils.i("receive: 收钱" + data_str + "\r\n" + "：总收款：" + inputMoney);
+//            }
+//
+//            @Override
+//            public void onNextMoney() {
+//
+//            }
+//        });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
             // 禁用 AAudio，使用 AudioTrack
             System.setProperty("aaudio.mmap_exclusive.enabled", "false");
@@ -153,14 +301,139 @@ public class MainActivityNew extends AppCompatActivity {
 
     }
 
+    String[] GPIOName = {"GPIO1_A3", "GPIO1_A2", "GPIO1_A1", "GPIO1_A0"};
+
+    public void openGPIO() {
+        for (int i = 0; i < 4; i++) {
+            final GpioInfo gpioInfo = new GpioInfo();
+            gpios.add(gpioInfo);
+            final Gpio gpioobj = new Gpio();
+            gpioInfo.gpio = gpioobj;
+            String gpio_name = GPIOName[i];
+            boolean ss = gpioobj.open(gpio_name);
+
+            if (!ss) {
+                Toast.makeText(MainActivityNew.this, "打開失敗", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+//            if (gpioInfo.inputThread != null)
+//                return;
+            gpioInfo.inputThread = new SendThread();
+            gpioInfo.inputThread.start();
+            gpioInfo.ThreadisSend = true;
+//            outputLog(log[i] + "开始检测输入");
+//            if (gpioobj.getValue() == -1) {
+//                outputLog("该IO口已被删除");
+//            }
+        }
+    }
+
+    String[] log = {"直接開分", "選擇開分", "洗分", "拍拍樂"};
+
+    private class SendThread extends Thread {
+
+        SendThread() {
+        }
+
+        @Override
+        public void run() {
+            while (gpios.get(0).ThreadisSend) {
+                for (int i = 0; i < gpios.size(); i++) {
+                    final GpioInfo gi = gpios.get(i);
+                    // 获取当前 GPIO 电平 (0 或 1)
+                    final int value = gi.gpio.getValue();
+                    final int index = i;
+
+                    // 只有状态变化时才更新 UI 或打印日志，可以节省性能
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            boolean isChecked = (value == 0);
+                            if (isChecked) {
+                                if (index == 0) {
+                                    activityBinding.webview.callHandler("onScore", "直接開分", new OnBridgeCallback() {
+                                        @Override
+                                        public void onCallBack(String s) {
+                                            //處理完回來
+                                        }
+                                    });
+                                } else if (index == 1) {
+                                    activityBinding.webview.callHandler("selectScore", "選擇開分", new OnBridgeCallback() {
+                                        @Override
+                                        public void onCallBack(String s) {
+                                            //處理完回來
+                                        }
+                                    });
+                                } else if (index == 2) {
+                                    activityBinding.webview.callHandler("onWinScore", "洗分", new OnBridgeCallback() {
+                                        @Override
+                                        public void onCallBack(String s) {
+                                            //處理完回來
+                                        }
+                                    });
+                                } else if (index == 3) {
+                                    activityBinding.webview.callHandler("onPaiPaiLe", "拍拍樂", new OnBridgeCallback() {
+                                        @Override
+                                        public void onCallBack(String s) {
+                                            //處理完回來
+                                        }
+                                    });
+                                }
+
+
+                            }
+                            // 如果当前状态与 Switch 状态不一致，则更新
+//                            if (gi.sGpioValue.isChecked() != isChecked) {
+//                                gi.sGpioValue.setChecked(isChecked);
+//                                // 只有在触发（低电平）时打印日志
+//                                if (isChecked) {
+//                                    outputLog("触发信号: " + log[index]);
+//                                }
+//                            }
+                        }
+                    });
+                }
+                try {
+                    Thread.sleep(50); // 每秒检测 20 次，足以捕捉大部分纸币机信号
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+
+        }
+    }
+
+    public void close() {
+        for (int i = 0; i < 3; i++) {
+            final int gpiovalue = ZtlManager.GetInstance().gpioStringToInt(GPIOName[i]);
+            GpioInfo gi = gpios.get(i);
+            gi.ThreadisSend = false;
+            if (gi.inputThread != null) {
+                gi.inputThread.interrupt();
+                gi.inputThread = null;
+            }
+            String root_unexport = "chmode 777 /sys/class/gpio/unexport";
+            String delete_Gpio = "echo " + "\"" + gpiovalue + "\"" + ">sys/class/gpio/unexport";
+            ZtlManager.GetInstance().execRootCmdSilent(delete_Gpio);
+            ZtlManager.GetInstance().execRootCmdSilent(root_unexport);
+        }
+
+
+    }
 
     private void startWorkMoney() {
-        LogUtils.i("send: 3E" + "\r\n");
-        USB.write("3E");
-        LogUtils.i("send: 18" + "\r\n");
-        USB.write("18");
-//        dataBinding.debugTv.append("\r\n纸钞机开始收钱");
-
+//        LogUtils.i("send: 3E" + "\r\n");
+//        USB.write("3E");
+//        LogUtils.i("send: 18" + "\r\n");
+//        USB.write("18");
+////        dataBinding.debugTv.append("\r\n纸钞机开始收钱");
+        if (!serialPort.isOpen()) {
+            serialPort.open();
+        }
+        serialPort.sendHex("3E");
+        serialPort.sendHex("18");
         if (myCountDownTimerXinTiao != null) {
             myCountDownTimerXinTiao.cancel();
         }
@@ -175,7 +448,8 @@ public class MainActivityNew extends AppCompatActivity {
         }
         myCountDownTimerXinTiao = null;
         LogUtils.i("send: 5E" + "\r\n");
-        USB.write("5E");
+        serialPort.sendHex("5E");
+//        USB.write("5E");
 
     }
 
@@ -192,7 +466,8 @@ public class MainActivityNew extends AppCompatActivity {
         @Override
         public void onTick(long l) {
             LogUtils.i("send: 02" + "\r\n");
-            USB.write("02");
+            serialPort.sendHex("02");
+//            USB.write("02");
 //            dataBinding.debugTv.append("\r\n纸钞机心跳");
 
         }
@@ -236,7 +511,9 @@ public class MainActivityNew extends AppCompatActivity {
             domain = domain.substring(0, domain.length() - 1);
         }
         LogUtils.i("请求地址是啥：" + domain + "?isApp=1");
-        activityBinding.webview.loadUrl(domain + "?isApp=1");
+        //activityBinding.webview.loadUrl(domain + "?isApp=1");
+        activityBinding.webview.loadUrl(ApiService.DEFAULT_WEB_URL);
+
 //        activityBinding.webview.loadUrl(domain + "");
 
 //        activityBinding.webview.loadUrl("http://192.168.0.58:7456/");
@@ -465,13 +742,13 @@ public class MainActivityNew extends AppCompatActivity {
             // 如果目标应用未安装，则捕获异常并处理
             activityBinding.showLoadd.setVisibility(View.VISIBLE);
             UpdateConfig config = new UpdateConfig();
-            config.setUrl("https://oss.letschat2023.com/vip_gamecontainer.apk");
+            config.setUrl("https://storage.googleapis.com/yjbfile/test/apk/vip-gamecontainer.apk");
 
-            new AppUpdater(MainActivityNew.this,config)
+            new AppUpdater(MainActivityNew.this, config)
                     .setUpdateCallback(new AppUpdateCallback() {
                         @Override
                         public void onDownloading(boolean isDownloading) {
-                            if(isDownloading){
+                            if (isDownloading) {
 //                                showToast("已经在下载中,请勿重复下载。");
                                 activityBinding.showLoadd.setVisibility(View.GONE);
                             }
@@ -484,7 +761,7 @@ public class MainActivityNew extends AppCompatActivity {
 
                         @Override
                         public void onProgress(long progress, long total, boolean isChange) {
-                            activityBinding.loadingTvs.setText("正在加載遊戲框架"+((progress*100)/total)+"%…");
+                            activityBinding.loadingTvs.setText("正在加載遊戲框架" + ((progress * 100) / total) + "%…");
 
                         }
 
@@ -559,6 +836,7 @@ public class MainActivityNew extends AppCompatActivity {
 
                 }
             }
+
 
 //            if (isNetError&&isAtGame) {
 //                topVvvv.setVisibility(View.VISIBLE);
@@ -857,6 +1135,10 @@ public class MainActivityNew extends AppCompatActivity {
     public void onDestroy() {
         stopWorkMoney();
         dimessWebView();
+        close();
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
         super.onDestroy();
     }
 
@@ -875,7 +1157,7 @@ public class MainActivityNew extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        USB.connect();  // 当系统监测到usb插入动作后跳转到此页面时
+       // USB.connect();  // 当系统监测到usb插入动作后跳转到此页面时
         if (isGameOver) {
             isGameOver = false;
             startActivity(new Intent(this, MainActivityNew.class));
