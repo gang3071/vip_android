@@ -2,6 +2,7 @@ package com.timego.game;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,12 +20,18 @@ import com.timego.game.databinding.ActivityMain2GameGeckoBinding;
 
 import org.mozilla.geckoview.GeckoResult;
 import org.mozilla.geckoview.GeckoRuntime;
+import org.mozilla.geckoview.GeckoRuntimeSettings;
 import org.mozilla.geckoview.GeckoSession;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 
 public class GameGeckoActivity extends AppCompatActivity {
 
     ActivityMain2GameGeckoBinding activityBinding;
+    Map<String, String> headers;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -48,7 +55,8 @@ public class GameGeckoActivity extends AppCompatActivity {
         hideBottomUIMenu();
         initView();
 //        activityBinding.backIv.setOnClickListener(view -> onBackPressed());
-
+        headers = new HashMap<>();
+        headers.put("Accept-Language", "zh-TW,zh;q=0.9"); // 告诉服务器优先返回繁体
         getBaseUrls();
 
 
@@ -75,8 +83,8 @@ public class GameGeckoActivity extends AppCompatActivity {
                 @Override
                 public void onProgressChange(@NonNull GeckoSession session, int progress) {
                     GeckoSession.ProgressDelegate.super.onProgressChange(session, progress);
-                    LogUtils.i("进度是啥："+progress);
-                    if(progress>=99){
+                    LogUtils.i("进度是啥：" + progress);
+                    if (progress >= 99) {
                         activityBinding.showTopLy.setVisibility(View.GONE);
 //                        LogUtils.i("设备信息22："+session.getSettings().getUserAgentOverride());
 //                        LogUtils.i("设备信息22："+GsonUtils.beanToJSONString(session.getUserAgent()));
@@ -95,13 +103,20 @@ public class GameGeckoActivity extends AppCompatActivity {
 
 
             if (sRuntime == null) {
-                // GeckoRuntime can only be initialized once per process
-                sRuntime = GeckoRuntime.create(this);
+                // 120版本中，如果 Builder 找不到方法，通常它会默认读取系统的 Locale 列表
+                Locale locale = new Locale("zh", "TW");
+                Locale.setDefault(locale);
+                Configuration config = new Configuration();
+                config.setLocale(locale);
+                this.getResources().updateConfiguration(config, this.getResources().getDisplayMetrics());
+                GeckoRuntimeSettings settings = new GeckoRuntimeSettings.Builder().build();
+                // 2. 创建 Runtime
+                sRuntime = GeckoRuntime.create(this, settings);
             }
             session.open(sRuntime);
             activityBinding.webview.setSession(session);
             session.loadUri(domain);
-            LogUtils.i("设备信息22："+GsonUtils.beanToJSONString(session.getUserAgent()));
+            LogUtils.i("设备信息22：" + GsonUtils.beanToJSONString(session.getUserAgent()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -186,7 +201,7 @@ public class GameGeckoActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        if(session!=null){
+        if (session != null) {
             session.close();
             session = null;
         }

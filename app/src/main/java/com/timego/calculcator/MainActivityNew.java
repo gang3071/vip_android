@@ -10,6 +10,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -64,17 +65,24 @@ import com.smallbuer.jsbridge.core.CallBackFunction;
 //import com.tencent.smtt.sdk.WebView;
 //import com.tencent.smtt.sdk.WebViewClient;
 import com.smallbuer.jsbridge.core.OnBridgeCallback;
+import com.timego.calculcator.api.ApiNew11;
 import com.timego.calculcator.api.ApiService;
+import com.timego.calculcator.api.BaseObserver;
+import com.timego.calculcator.api.Result;
 import com.timego.calculcator.databinding.ActivityMain2Binding;
 import com.timego.calculcator.databinding.ActivityMain2NewBinding;
 import com.timego.calculcator.driver.USBTransferUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ZtlApi.Gpio;
 import ZtlApi.ZtlManager;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import top.maybesix.xhlibrary.serialport.ComPortData;
 import top.maybesix.xhlibrary.serialport.SerialPortHelper;
 
@@ -101,6 +109,8 @@ public class MainActivityNew extends AppCompatActivity {
     ActivityMain2NewBinding activityBinding;
     //USBTransferUtil USB;
     public static SerialPortHelper serialPort; //数钞机
+
+    Map<String, String> headers;
 
     int inputMoney = 0;
     public ArrayList<Integer> numbers = new ArrayList<>();
@@ -258,7 +268,7 @@ public class MainActivityNew extends AppCompatActivity {
         initView();
         activityBinding.backIv.setOnClickListener(view -> onBackPressed());
 
-        getBaseUrls();
+         getBaseUrls();
         openGPIO();
         serialPort = ((APPAplication) getApplication()).getSerialPortHelper();
         serialPort.setSerialPortReceivedListener(new SerialPortHelper.OnSerialPortReceivedListener() {
@@ -297,6 +307,94 @@ public class MainActivityNew extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
             // 禁用 AAudio，使用 AudioTrack
             System.setProperty("aaudio.mmap_exclusive.enabled", "false");
+        }
+
+    }
+
+    private void getVersionNew() {
+        ApiNew11.getInstance().getConfigs(ApiService.DownLoadUrl)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new BaseObserver<Result<VersionBean>>() {
+
+                    @Override
+                    public void onSuccess(Result<VersionBean> feedbackResp) {
+//                        if(feedbackResp!=null) {
+//                            toNextActivity();
+//                        }
+                        LogUtils.i("获取到的数据：" + GsonUtils.beanToJSONString(feedbackResp));
+                        if (feedbackResp != null && feedbackResp.data != null) {
+                            if (feedbackResp.data.getVersion() > getVersionCode(MainActivityNew.this)) {
+                                activityBinding.showLoadd.setVisibility(View.VISIBLE);
+                                UpdateConfig config = new UpdateConfig();
+                                config.setUrl(feedbackResp.data.getDonwload_url());
+                                new AppUpdater(MainActivityNew.this, config)
+                                        .setUpdateCallback(new AppUpdateCallback() {
+                                            @Override
+                                            public void onDownloading(boolean isDownloading) {
+                                                if (isDownloading) {
+                                                    activityBinding.showLoadd.setVisibility(View.GONE);
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onStart(String url) {
+                                                activityBinding.loadingTvs.setText("正在更新0%…");
+                                            }
+
+                                            @Override
+                                            public void onProgress(long progress, long total, boolean isChange) {
+                                                activityBinding.loadingTvs.setText("正在更新" + ((progress * 100) / total) + "%…");
+                                            }
+
+                                            @Override
+                                            public void onFinish(File file) {
+                                                activityBinding.showLoadd.setVisibility(View.GONE);
+                                            }
+
+                                            @Override
+                                            public void onError(Exception e) {
+                                                activityBinding.showLoadd.setVisibility(View.GONE);
+                                            }
+
+                                            @Override
+                                            public void onCancel() {
+                                                activityBinding.showLoadd.setVisibility(View.GONE);
+                                            }
+                                        })
+                                        .start();
+
+                            } else {
+                                Toast.makeText(MainActivityNew.this, "當前已是最新版本", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(int code, String msg) {
+
+                    }
+                });
+    }
+
+    /**
+     * 获取版本号
+     *
+     * @return
+     */
+
+    public int getVersionCode(Context context) {
+
+        int version = 0;
+        PackageManager packagemanager = context.getPackageManager();
+
+        PackageInfo packinfo = null;
+        try {
+            packinfo = packagemanager.getPackageInfo(context.getPackageName(), 0);
+            version = packinfo.versionCode;
+            return version;
+        } catch (PackageManager.NameNotFoundException e) {
+            return version;
         }
 
     }
@@ -482,7 +580,7 @@ public class MainActivityNew extends AppCompatActivity {
 
     private void getBaseUrls() {
         LogUtils.i("0000000000");
-        toLoadUrl(MainActivity.getString(MainActivityNew.this, "domain", ApiService.DEFAULT_WEB_URL));
+       toLoadUrl(MainActivity.getString(MainActivityNew.this, "domain", ApiService.DEFAULT_WEB_URL));
 //        Api.getInstance().getChannelInfo(ApiService.Site_Id)
 //                .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
@@ -512,8 +610,9 @@ public class MainActivityNew extends AppCompatActivity {
         }
         LogUtils.i("请求地址是啥：" + domain + "?isApp=1");
         //activityBinding.webview.loadUrl(domain + "?isApp=1");
-        activityBinding.webview.loadUrl(ApiService.DEFAULT_WEB_URL);
-
+         activityBinding.webview.loadUrl(ApiService.DEFAULT_WEB_URL,headers);
+//        activityBinding.webview.loadUrl("https://slot.kkcnw.cn/",headers);
+       // activityBinding.webview.loadUrl("file:///android_asset/index.html");
 //        activityBinding.webview.loadUrl(domain + "");
 
 //        activityBinding.webview.loadUrl("http://192.168.0.58:7456/");
@@ -576,15 +675,42 @@ public class MainActivityNew extends AppCompatActivity {
 
     @SuppressLint({"NewApi", "WrongConstant"})
     protected void initView() {
+//        activityBinding.webview.setBackgroundColor(0); // 设置背景透明
+        WebSettings settings = activityBinding.webview.getSettings();
+        // 1. 核心：必须开启 JS
+        settings.setJavaScriptEnabled(true);
 
-//        WebSettings settings = activityBinding.webview.getSettings();
-//        settings.setDomStorageEnabled(true);
-//        settings.setAppCacheEnabled(true);
-//        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+// 2. 关键：Vue Router 和 Vuex 经常使用 LocalStorage
+        settings.setDomStorageEnabled(true);
+
+// 3. 关键：解决 Vue 动态加载组件时的路径问题
+        settings.setAllowFileAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+
+// 4. 解决部分打包后的 JS 资源加载不出来（针对 Prefetch/Preload）
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
+// 5. 开启硬件加速渲染动画
+        activityBinding.webview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 //        settings.setJavaScriptEnabled(true);
-//        settings.setLoadWithOverviewMode(true);
-//        // 设置允许访问文件数据
-//        settings.setAllowFileAccess(true);
+
+// 1. 开启 DOM 存储 API (Vue/React 必开)
+//        settings.setDomStorageEnabled(true);
+
+// 2. 开启数据库存储 API
+//        settings.setDatabaseEnabled(true);
+
+// 3. 允许跨域访问本地资源 (解决 App.js 调用其他 JS 的问题)
+//        settings.setAllowFileAccessFromFileURLs(true);
+//        settings.setAllowUniversalAccessFromFileURLs(true);
+
+// 4. 确保混合内容模式 (如果 JS 里有 http 请求)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+//        }
+
+       // activityBinding.webview.loadUrl("file:///android_asset/index.html");
 //        settings.setAllowContentAccess(true);
 //        settings.setDatabaseEnabled(true);
 //        settings.setSavePassword(true);
@@ -615,10 +741,12 @@ public class MainActivityNew extends AppCompatActivity {
 //        settings.setAllowUniversalAccessFromFileURLs(true);
 //
 
-//        activityBinding.webview.setWebChromeClient(webChromeClient);
+        activityBinding.webview.setWebChromeClient(webChromeClient);
         activityBinding.webview.setWebViewClient(webViewClient);
         activityBinding.webview.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         activityBinding.webview.getSettings().setDomStorageEnabled(true);
+        headers = new HashMap<>();
+        headers.put("Accept-Language", "zh-TW,zh;q=0.9"); // 告诉服务器优先返回繁体
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             activityBinding.webview.getSettings().setOffscreenPreRaster(false);
@@ -640,7 +768,7 @@ public class MainActivityNew extends AppCompatActivity {
             }
 
         });
-//        activityBinding.webview.loadUrl(url);
+////        activityBinding.webview.loadUrl(url);
 
 
 //
@@ -946,7 +1074,7 @@ public class MainActivityNew extends AppCompatActivity {
 //                        Intent browserIntent = new Intent(MainActivity2.this, WebViewActivity.class);
 //                        browserIntent.putExtra("url", url);
 //                        startActivity(browserIntent);
-                        activityBinding.webview.loadUrl(url);
+                        activityBinding.webview.loadUrl(url, headers);
                         return true;
                     }
                     return false;
@@ -1157,7 +1285,7 @@ public class MainActivityNew extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-       // USB.connect();  // 当系统监测到usb插入动作后跳转到此页面时
+        // USB.connect();  // 当系统监测到usb插入动作后跳转到此页面时
         if (isGameOver) {
             isGameOver = false;
             startActivity(new Intent(this, MainActivityNew.class));

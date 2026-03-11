@@ -20,6 +20,7 @@ public class HeaderInterceptor implements Interceptor {
         Request request = chain.request().newBuilder()
                 .addHeader("Site-Id", ApiService.Site_Id)
                 .build();
+
 //        LogUtils.i("头文件language："+language);
         return chain.proceed(request);
     }

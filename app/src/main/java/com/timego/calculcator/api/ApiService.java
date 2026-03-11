@@ -32,15 +32,16 @@ public interface ApiService {
     //大陆站
 //    String BASE_URL = "https://api.baozhuangmall.com";
     //测试服
-    String BASE_URL = isProduction?"https://api.1ting.cn":"https://yjb-test-api.qtalk666.top";
+   // String BASE_URL = isProduction?"https://api.1ting.cn":"https://yjb-test-api.qtalk666.top";
+    String BASE_URL = isProduction?"https://api.1ting.cn":"https://api-test.1ting.cn";
 
     String Site_Id = "7e3c09b8-38ed-4092-b8ec-872fdec78499";
     //String DEFAULT_WEB_URL = "http://client.senboli.com";
     String DEFAULT_WEB_URL = "https://yxw.1ting.cn";
 
-    String DownLoadUrl = "https://oss.letschat2023.com/version.json";
+    String DownLoadUrl = "https://storage.googleapis.com/yjbfile/test/apk/ersion_vip.json";
 
-    String DownLoadUrl_TEST = "https://oss.letschat2023.com/version_test.json";
+    String DownLoadUrl_TEST = "https://storage.googleapis.com/yjbfile/test/apk/ersion_vip.json";
 
     @FormUrlEncoded
     @POST("/external/get-password")

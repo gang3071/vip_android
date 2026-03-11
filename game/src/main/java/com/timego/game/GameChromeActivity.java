@@ -44,10 +44,16 @@ import androidx.core.content.ContextCompat;
 
 import com.timego.game.databinding.ActivityMain2GameBinding;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class GameChromeActivity extends AppCompatActivity {
 
     ActivityMain2GameBinding activityBinding;
+
+    Map<String, String> headers;
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -71,7 +77,8 @@ public class GameChromeActivity extends AppCompatActivity {
         hideBottomUIMenu();
         initView();
         isFullGame();
-
+        headers = new HashMap<>();
+        headers.put("Accept-Language", "zh-TW,zh;q=0.9"); // 告诉服务器优先返回繁体
         getBaseUrls();
 
 
@@ -121,7 +128,7 @@ public class GameChromeActivity extends AppCompatActivity {
 
     private void toLoadUrl(String domain) {
         Log.i("结果是啥", "结果是啥：" + domain);
-        activityBinding.webview.loadUrl(domain);
+        activityBinding.webview.loadUrl(domain,headers);
 
         //
 //        String baseInfos = "<!DOCTYPE html>" +
@@ -509,7 +516,7 @@ public class GameChromeActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     } else {
-                        activityBinding.webview.loadUrl(url);
+                        activityBinding.webview.loadUrl(url,headers);
                         return true;
                     }
                     return false;

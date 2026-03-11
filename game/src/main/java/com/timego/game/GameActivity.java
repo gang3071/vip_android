@@ -45,10 +45,15 @@ import androidx.core.content.ContextCompat;
 
 import com.timego.game.databinding.ActivityMain2GameBinding;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class GameActivity extends AppCompatActivity {
 
     ActivityMain2GameBinding activityBinding;
+
+    Map<String, String> headers;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -72,16 +77,17 @@ public class GameActivity extends AppCompatActivity {
         hideBottomUIMenu();
         initView();
         isFullGame();
-
+        headers = new HashMap<>();
+        headers.put("Accept-Language", "zh-TW,zh;q=0.9"); // 告诉服务器优先返回繁体
         getBaseUrls();
 
 
     }
 
     private void isFullGame() {
-        if(getIntent().getStringExtra("gameUrl").endsWith("&display_mode=1")){
+        if (getIntent().getStringExtra("gameUrl").endsWith("&display_mode=1")) {
 
-        }else{
+        } else {
 
         }
     }
@@ -112,7 +118,7 @@ public class GameActivity extends AppCompatActivity {
 
 
     private void getBaseUrls() {
-        LogUtils.i("地址是啥："+getIntent().getStringExtra("gameUrl"));
+        LogUtils.i("地址是啥：" + getIntent().getStringExtra("gameUrl"));
 
         toLoadUrl(getIntent().getStringExtra("gameUrl"));
 //        toLoadUrl("https://ts2gamesite.royalgaming777.com/EnterGame2?token=iraANuizPPu9hYdljkBZMz53WTnNncgOFkgLlOykuHpjmdPBBQ5v6y1YbkXnOKf_");
@@ -122,7 +128,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void toLoadUrl(String domain) {
         Log.i("结果是啥", "结果是啥：" + domain);
-        activityBinding.webview.loadUrl(domain);
+        activityBinding.webview.loadUrl(domain, headers);
 
         //
 //        String baseInfos = "<!DOCTYPE html>" +
@@ -198,7 +204,7 @@ public class GameActivity extends AppCompatActivity {
 //        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         activityBinding.webview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 //
-        LogUtils.i("设备信息："+activityBinding.webview.getSettings().getUserAgentString());
+        LogUtils.i("设备信息：" + activityBinding.webview.getSettings().getUserAgentString());
 
 //        activityBinding.webview.getSettings().setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36");
 //        LogUtils.i("设备信息1："+activityBinding.webview.getSettings().getUserAgentString());
@@ -352,14 +358,14 @@ public class GameActivity extends AppCompatActivity {
 
     private void simulateClickStartEnd(View view, float endX, float endY) {
         long moveTime = SystemClock.uptimeMillis();
-        if (endX - startX > 200 || endY - startY > 200||endX - startX < -200 || endY - startY < -200) {
+        if (endX - startX > 200 || endY - startY > 200 || endX - startX < -200 || endY - startY < -200) {
             Log.i("焦点", "焦点MOVE：" + endX + ";" + endY);
 
             final MotionEvent upEvent = MotionEvent.obtain(moveTime, moveTime, MotionEvent.ACTION_MOVE, endX, endY, 0);
             view.onTouchEvent(upEvent);
             upEvent.recycle();
         }
-        moveTime+=1000;
+        moveTime += 1000;
         Log.i("焦点", "焦点ACTION_UP：" + endX + ";" + endY);
         final MotionEvent upEvent = MotionEvent.obtain(moveTime, moveTime, MotionEvent.ACTION_UP, endX, endY, 0);
         view.onTouchEvent(upEvent);
@@ -510,7 +516,7 @@ public class GameActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     } else {
-                        activityBinding.webview.loadUrl(url);
+                        activityBinding.webview.loadUrl(url, headers);
                         return true;
                     }
                     return false;

@@ -15,7 +15,7 @@ import retrofit2.http.Url;
  */
 
 public interface ApiService {
-    String DownLoadUrl = "https://oss.letschat2023.com/game_version.json";
+    String DownLoadUrl = "https://storage.googleapis.com/yjbfile/test/apk/vip-gamecontainer.json";
 
     String BASE_URL = "https://api.baozhuangmall.com";
 

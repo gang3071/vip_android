@@ -4,6 +4,7 @@ package com.timego.calculcator.api;
 
 import com.timego.calculcator.LogUtils;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -16,7 +17,10 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
@@ -125,6 +129,22 @@ public class ApiNew11 extends BaseApi {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         builder.addInterceptor(interceptor);
 //        }
+        Interceptor languageInterceptor = new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request originalRequest = chain.request();
+
+                // 在原有请求的基础上添加或修改 Header
+                Request newRequest = originalRequest.newBuilder()
+                        .header("Accept-Language", "zh-TW,zh;q=0.9") // 设置台湾繁体
+                        .header("Content-Language", "zh-TW")
+                        .method(originalRequest.method(), originalRequest.body())
+                        .build();
+
+                return chain.proceed(newRequest);
+            }
+        };
+        builder.addInterceptor(languageInterceptor);
         return builder.build();
 
     }
